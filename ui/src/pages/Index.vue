@@ -64,7 +64,7 @@ export default class PageIndex extends Vue {
 
   startListening(): void {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion,@typescript-eslint/unbound-method
-    this.eb!.onclose = this.connectEventBus;
+    this.eb!.onclose = this.connectToNewPod;
     this.eb?.registerHandler('status', (err: never, msg: { body: { id: string; }; }) => {
       if (err) {
         this.$q.loading.hide();
@@ -84,7 +84,7 @@ export default class PageIndex extends Vue {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  connectToNewPod(t: number): void {
+  connectToNewPod(): void {
       this.$q.loading.show();
       // Every X Seconds, disconnect and reconnect in order to access different hosts
       this.eb?.close();
