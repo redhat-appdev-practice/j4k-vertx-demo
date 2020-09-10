@@ -1,0 +1,22 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: j4kdemo
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: j4kdemo
+    app.kubernetes.io/component: j4kdemo
+    app.kubernetes.io/instance: j4kdemo
+  annotations:
+    openshift.io/generated-by: OpenShiftNewApp
+spec:
+  ports:
+    - name: 8080-tcp
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    deployment: j4kdemo
+  clusterIP: ''
+  type: ClusterIP
+  sessionAffinity: None
