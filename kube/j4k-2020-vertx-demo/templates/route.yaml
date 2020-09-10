@@ -1,3 +1,4 @@
+{{- if eq $.Values.useRoute true }}
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
@@ -15,3 +16,4 @@ spec:
   port:
     targetPort: 8080-tcp
   wildcardPolicy: None
+{{- end }}

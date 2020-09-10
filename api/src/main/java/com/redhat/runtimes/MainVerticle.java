@@ -36,9 +36,13 @@ public class MainVerticle extends AbstractVerticle {
         LOG.info("Creating Router");
         final Router router = Router.router(vertx);
 
+        // Use the clustered session implementation
         router.route().handler(clusteredSession());
+
+        // Create a GET endpoint
         router.get("/podinfo").handler(this::podInfoHandler);
 
+        // Enable all other endpoints to serve static content from src/main/resources/webroot
         router.route().handler(configStaticHandler());
 
         LOG.info("Create EventBus Bridge");
@@ -48,17 +52,22 @@ public class MainVerticle extends AbstractVerticle {
         HttpServer server = vertx.createHttpServer()
             .requestHandler(router);
 
+        // Start the HTTP Server
         server.listen(config().getInteger("port", 8080))
-            .compose(this::initSharedData)
+            .compose(this::initSharedData)                  // Initialize a shared data structure in the cluster
             .onSuccess(counter -> {
                 requestCounter = counter;
                 LOG.info("Setting up periodic status messages");
-                vertx.setPeriodic(400, this::sendPeriodic);
+                vertx.setPeriodic(400, this::sendPeriodic); // Set up a periodic eventbus message broadcast
             })
-            .onComplete(res -> startPromise.complete())
-            .onFailure(startPromise::fail);
+            .onComplete(res -> startPromise.complete())     // Let Vert.x know our Verticle is running
+            .onFailure(startPromise::fail);                 // OR let Vert.x know our Verticle failed
     }
 
+    /**
+     * Create and configure a Static handler for serving static resources like HTML/JS/Images
+     * @return
+     */
     private StaticHandler configStaticHandler() {
         return StaticHandler
                     .create()
@@ -68,18 +77,30 @@ public class MainVerticle extends AbstractVerticle {
                     .setDirectoryListing(false);
     }
 
+    /**
+     * Create and configure a websocket<->eventbus bridge
+     * @return
+     */
     private Router sockJsBridge() {
         final SockJSBridgeOptions bridgeOpts = new SockJSBridgeOptions()
-                .addInboundPermitted(new PermittedOptions().setAddressRegex(".*"))
-                .addOutboundPermitted(new PermittedOptions().setAddressRegex(".*"));
+                .addInboundPermitted(new PermittedOptions().setAddressRegex(".*"))      // Allow inbound messages to ANY evenbus address
+                .addOutboundPermitted(new PermittedOptions().setAddressRegex(".*"));    // Allow outbound messages to ANY eventbus address
         return SockJSHandler.create(vertx).bridge(bridgeOpts);
     }
 
+    /**
+     * Create and configure a clustered Session manager for HTTP session data
+     * @return
+     */
     private SessionHandler clusteredSession() {
         SessionStore store = ClusteredSessionStore.create(vertx);
         return SessionHandler.create(store);
     }
 
+    /**
+     * Return information about this pod
+     * @param ctx An instance of {@link RoutingContext} containing references to the request and response for this HTTP interaction
+     */
     private void podInfoHandler(RoutingContext ctx) {
         Session session = ctx.session();
         JsonObject podInfo = new JsonObject();
@@ -96,10 +117,20 @@ public class MainVerticle extends AbstractVerticle {
         requestCounter.incrementAndGet();
     }
 
+    /**
+     * Initialize a cluster-wide shared/atomic counter
+     * @param server An ignored parameter to make the method signatures match
+     * @return An reference to an instance of {@link Counter}
+     */
     private Future<Counter> initSharedData(HttpServer server) {
         return vertx.sharedData().getCounter(REQUEST_COUNTER);
     }
 
+    /**
+     * Retrieve the current state of the clustered counter and send out a
+     * message on the eventbus with the current state of this pod
+     * @param t The timestampe of the periodic scheduler
+     */
     private void sendPeriodic(Long t) {
         requestCounter.get()
             .onComplete(res -> {
