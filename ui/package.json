@@ -9,10 +9,12 @@
     "lint": "eslint --ext .js,.ts,.vue ./",
     "test": "echo \"No test specified\" && exit 0",
     "dev": "./node_modules/.bin/quasar dev",
-    "compose": "npm install && npm run dev"
+    "compose": "npm install && npm run dev",
+    "build": "quasar build"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "axios": "^0.20.0",
     "core-js": "^3.6.5",
     "moment": "^2.0.0",
     "quasar": "^1.0.0",
@@ -21,11 +23,12 @@
     "vue-property-decorator": "^8.3.0"
   },
   "devDependencies": {
-    "@types/moment": "^2.13.0",
-    "@types/vertx3-eventbus-client": "^3.5.1",
+    "http-proxy-middleware": "0.19.1",
     "@quasar/app": "^2.0.0",
     "@quasar/cli": "^1.1.0",
+    "@types/moment": "^2.13.0",
     "@types/node": "^10.17.15",
+    "@types/vertx3-eventbus-client": "^3.5.1",
     "@typescript-eslint/eslint-plugin": "^3.3.0",
     "@typescript-eslint/parser": "^3.3.0",
     "babel-eslint": "^10.0.1",

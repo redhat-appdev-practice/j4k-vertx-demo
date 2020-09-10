@@ -1,26 +1,29 @@
 import { MutationTree } from 'vuex';
 import { StateInterface, Pod } from './state';
-import { Vue } from 'vue-property-decorator';
+import moment from 'moment';
 
 export interface Payload {
   [key: string]: Pod | string | boolean | number | undefined;
 }
 
 const mutation: MutationTree<StateInterface> = {
-  SET_FROM_KEYS (state: StateInterface, payload: string): void {
-    const podIndex = state.pods.findIndex(p => p.id == payload);
+  UPDATE_OR_INSERT_POD_ID (state: StateInterface, payload: { id: string, requestCount: number }): void {
+    const podIndex = state.pods.findIndex(p => p.id == payload.id);
     if (podIndex >= 0) {
-      state.pods[podIndex].id = payload;
+      state.pods[podIndex].id = payload.id;
+      state.pods[podIndex].requestCount = payload.requestCount;
       state.pods[podIndex].lastUpdate = new Date();
     } else {
-      console.log(`Adding new pod: ${payload}`);
-      state.pods.push({id: payload, lastUpdate: new Date()});
+      console.log(`Adding new pod: ${payload.id}`);
+      state.pods.push({id: payload.id, lastUpdate: new Date(), requestCount: payload.requestCount});
     }
+    // .filter((p: { lastUpdate: moment.MomentInput; }) => moment().subtract(1, 'minute').isBefore(p.lastUpdate))
+    const filteredPods = state.pods.filter(p => moment().subtract(10, 'second').isBefore(p.lastUpdate));
+    state.pods = filteredPods;
   },
-  DELETE_KEY(state: StateInterface, payload: Payload): void {
-    const keyList = Object.keys(payload);
-    const filteredPods = state.pods.filter(p => keyList.indexOf(p.id) == -1);
-    Vue.set(state, 'pods', filteredPods);
+  UPDATE_CURRENT_POD (state: StateInterface, payload: {id: string, count: number}): void {
+    state.currentPod = payload.id;
+    state.sessionIncrement = payload.count;
   }
 };
 

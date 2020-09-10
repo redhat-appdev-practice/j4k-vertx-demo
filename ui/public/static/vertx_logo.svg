@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg:svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="152.355"
+   height="152.355"
+   viewBox="0 0 40.310665 40.310665"
+   version="1.1"
+   id="svg12"
+   sodipodi:docname="Vertx_Logo.svg"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
+  <svg:metadata
+     id="metadata18">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </svg:metadata>
+  <svg:defs
+     id="defs16" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1456"
+     inkscape:window-height="747"
+     id="namedview14"
+     showgrid="false"
+     inkscape:zoom="3.0980277"
+     inkscape:cx="23.753533"
+     inkscape:cy="75.42836"
+     inkscape:window-x="2370"
+     inkscape:window-y="394"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg12" />
+  <svg:rect
+     style="fill:#782a90;stroke:#782a90;stroke-width:1.90566957;stroke-linejoin:round"
+     id="rect2"
+     rx="4.6750002"
+     ry="4.013041"
+     y="0.95000356"
+     x="0.94999921"
+     height="38.682289"
+     width="38.411999"
+     inkscape:export-filename="/home/dphillips/Documents/Zanclus/Workspace/vertx-rest-with-frontend/src/main/frontend/src/statics/icons/ms-icon-144x144.png"
+     inkscape:export-xdpi="89.959999"
+     inkscape:export-ydpi="89.959999" />
+  <svg:path
+     style="fill:#ffffff;fill-rule:evenodd;stroke-width:0.98037654"
+     inkscape:connector-curvature="0"
+     id="path4"
+     d="M -0.04709341,8.3074096 H 5.8464646 L 11.686575,22.478429 17.77579,8.4564511 h 5.629183 L 13.18311,32.147995 H 9.9409366 Z"
+     inkscape:export-filename="/home/dphillips/Documents/Zanclus/Workspace/vertx-rest-with-frontend/src/main/frontend/src/statics/icons/ms-icon-144x144.png"
+     inkscape:export-xdpi="89.959999"
+     inkscape:export-ydpi="89.959999" />
+  <svg:path
+     style="fill:#ffffff;fill-rule:evenodd;stroke-width:0.98037654"
+     inkscape:connector-curvature="0"
+     id="path6"
+     d="m 17.719479,8.3436629 h 7.119036 l 4.380799,6.7038431 4.380799,-6.702836 h 7.010232 L 24.728757,32.036214 h -6.900474 l 7.99615,-11.788371 z m 12.702407,19.6956221 3.286076,-4.969726 6.133118,8.899184 h -6.900473 z"
+     inkscape:export-filename="/home/dphillips/Documents/Zanclus/Workspace/vertx-rest-with-frontend/src/main/frontend/src/statics/icons/ms-icon-144x144.png"
+     inkscape:export-xdpi="89.959999"
+     inkscape:export-ydpi="89.959999" />
+  <svg:ellipse
+     style="fill:#ffffff;stroke:#782a90;stroke-width:2.06957531;stroke-linejoin:round"
+     id="circle8"
+     cy="32.045269"
+     cx="17.289032"
+     rx="4.1975493"
+     ry="4.428947"
+     inkscape:export-filename="/home/dphillips/Documents/Zanclus/Workspace/vertx-rest-with-frontend/src/main/frontend/src/statics/icons/ms-icon-144x144.png"
+     inkscape:export-xdpi="89.959999"
+     inkscape:export-ydpi="89.959999" />
+  <script />
+</svg:svg>

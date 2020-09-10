@@ -3,6 +3,7 @@
     <q-header elevated>
       <q-toolbar>
         <img alt="Red Hat" src="/static/logo.svg" class="logo" />
+        <img alt="Vert.x" src="/static/vertx_logo.svg" class="logo" />
         <q-toolbar-title>
           J4K Demo
         </q-toolbar-title>
@@ -27,4 +28,5 @@ export default class MainLayout extends Vue {
 <style lang="sass" scoped>
 .logo
   height: 4em
+  margin: 0.2rem
 </style>

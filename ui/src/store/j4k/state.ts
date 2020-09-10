@@ -1,17 +1,18 @@
 export interface Pod {
   id: string;
   lastUpdate?: Date;
+  requestCount?: number;
 }
 
 export interface StateInterface {
   pods: Pod[];
   currentPod?: string;
+  sessionIncrement: number;
 }
 
 const state: StateInterface = {
-  pods: [
-  ],
-  currentPod: '096eef72-f05d-11ea-9b99-ef74f95edc4b'
+  pods: [],
+  sessionIncrement: 0
 };
 
 export default state;

@@ -1,1 +1,1 @@
-window.apiAddr = 'http://172.16.3.3';
+window.apiAddr = 'http://localhost';

@@ -1,26 +1,11 @@
 ---
 version: '3.8'
 services:
-  ui:
-    image: node:lts
-    volumes:
-      - ${PWD}/../ui:/workspace
-    working_dir: /workspace
-    command: npm run compose
-    ports:
-      - '8080:8080'
   api:
-    image: openjdk:11.0.8-slim
-    volumes:
-      - ${PWD}/../api:/workspace
-      - /tmp/m2/repository:/root/.m2/repository
-    command: java -jar target/j4k-demo-1.0.0-SNAPSHOT.jar run --cluster com.redhat.runtimes.MainVerticle -Djava.net.preferIPv4Stack=true -Djgroups.tcp.address=NON_LOOPBACK
-    working_dir: /workspace
+    image: docker.io/infosec812/j4k-2020-vertx-docker:latest
+    restart: always
   haproxy:
-    image: dockercloud/haproxy
-    links:
-    - api
+    image: myhaproxy
+    build: ./
     ports:
-    - "80:80"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - '80:80'

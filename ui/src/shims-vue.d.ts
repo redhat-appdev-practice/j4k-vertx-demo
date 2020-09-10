@@ -3,6 +3,3 @@ declare module '*.vue' {
   import Vue from 'vue';
   export default Vue;
 }
-
-import { CustomWindow } from './@types/CustomWindow';
-declare let window: CustomWindow;
