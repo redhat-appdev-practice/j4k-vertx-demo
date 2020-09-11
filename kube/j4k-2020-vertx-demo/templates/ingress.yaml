@@ -1,0 +1,13 @@
+{{- if eq $.Values.useRoute false }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: j4kdemo
+  namespace: {{ $.Release.Namespace }}
+spec:
+  defaultBackend:
+    resource:
+      apiGroup: v1
+      kind: Service
+      name: j4kdemo
+{{- end }}
