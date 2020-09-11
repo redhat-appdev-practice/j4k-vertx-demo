@@ -29,22 +29,25 @@ import io.vertx.ext.web.sstore.SessionStore;
 public class MainVerticle extends AbstractVerticle {
     private static final String INSTANCE_ID = UUID.randomUUID().toString();
     private static final String REQUEST_COUNTER = "requestCount";
+    private static final String APP_NAME = "appname";
 
     private static final Logger LOG = LoggerFactory.getLogger(MainVerticle.class);
 
     Counter requestCounter;
     private final JsonObject currentConfig = new JsonObject();
-    private ConfigRetrieverOptions addStore;
 
     @Override
     public void start(final Promise<Void> startPromise) {
-        currentConfig.put("appname", "J4K Vert.x Demo");
+        currentConfig.put(APP_NAME, "J4K Vert.x Demo");
         currentConfig.put("port", 8080);
         currentConfig.mergeIn(config());
 
         // Check to see if this application is running inside of a Kubernetes
         // cluster by looking to see if there is a service account token.
-        vertx.fileSystem().exists("/run/secrets/kubernetes.io/serviceaccount/token")
+        initKubernetesWatcher();
+
+        // Watch for configuration file changes
+        vertx.fileSystem().exists("./config.json")
             .onSuccess(this::initConfigWatcher);
 
         LOG.info("Creating Router");
@@ -178,7 +181,7 @@ public class MainVerticle extends AbstractVerticle {
     private void sendStatusWithRequestCount(Long requestCount) {
         JsonObject periodicMessage = new JsonObject().put("id", INSTANCE_ID);
                 periodicMessage.put(REQUEST_COUNTER, requestCount);
-                periodicMessage.put("appname", currentConfig.getString("appname"));
+                periodicMessage.put(APP_NAME, currentConfig.getString(APP_NAME));
                 vertx.eventBus().publish("status", periodicMessage);
     }
 
@@ -186,27 +189,42 @@ public class MainVerticle extends AbstractVerticle {
      * Listen for ConfigMap changes via the Kubernetes API and when the configuration
      * changes, load those configuration changes into the current configuration object.
      */
-    private void initConfigWatcher(Boolean isRunningInKubernetes) {
-        LOG.info("Detected Service Account Token: Attempting to load configuration from Kubernetes API.");
+    private void initKubernetesWatcher() {
+        if (System.getenv().containsKey("KUBERNETES_NAMESPACE")) {
+            LOG.info("Attempting to load configuration from Kubernetes API.");
+            ConfigRetrieverOptions configOpts = new ConfigRetrieverOptions();
+            ConfigStoreOptions kubeConfig = new ConfigStoreOptions()
+                                                    .setType("configmap")
+                                                    .setConfig(
+                                                        new JsonObject()
+                                                                .put("namespace", System.getenv().getOrDefault("KUBERNETES_NAMESPACE", "default"))
+                                                                .put("name", "j4kdemo")
+                                                    );
+            configOpts.addStore(kubeConfig);
 
-        ConfigStoreOptions configFile = new ConfigStoreOptions()
-                                                .setType("file")
-                                                .setFormat("json")
-                                                .setConfig(new JsonObject().put("path", "./config.json"));
-        ConfigStoreOptions kubeConfig = new ConfigStoreOptions()
-                                                .setType("configmap")
-                                                .setConfig(
-                                                    new JsonObject()
-                                                            .put("namespace", System.getenv().getOrDefault("KUBERNETES_NAMESPACE", "default"))
-                                                            .put("name", "j4kdemo")
-                                                );
-        ConfigRetrieverOptions retrOpts = new ConfigRetrieverOptions()
-                                                .addStore(configFile)
-                                                .addStore(kubeConfig);
+            ConfigRetriever retriever = ConfigRetriever.create(vertx, configOpts);
+            retriever.listen(this::loadNewConfig);
+        }
+    }
 
+    /**
+     * Listen for ConfigMap changes via the Kubernetes API and when the configuration
+     * changes, load those configuration changes into the current configuration object.
+     */
+    private void initConfigWatcher(boolean configJsonExists) {
+        LOG.info("Config JSON Existence: {}", configJsonExists);
+        if (configJsonExists) {
+            LOG.info("Detected Service Account Token: Attempting to load configuration from Kubernetes API.");
+            ConfigRetrieverOptions configOpts = new ConfigRetrieverOptions();
 
-        ConfigRetriever retriever = ConfigRetriever.create(vertx, retrOpts);
-        retriever.listen(this::loadNewConfig);
+            ConfigStoreOptions configFile = new ConfigStoreOptions()
+                                                    .setType("file")
+                                                    .setFormat("json")
+                                                    .setConfig(new JsonObject().put("path", "./config.json"));
+            configOpts.addStore(configFile);
+            ConfigRetriever retriever = ConfigRetriever.create(vertx, configOpts);
+            retriever.listen(this::loadNewConfig);
+        }
     }
 
     /**
