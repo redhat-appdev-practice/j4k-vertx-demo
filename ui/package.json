@@ -9,7 +9,7 @@
     "lint": "eslint --ext .js,.ts,.vue ./",
     "test": "echo \"No test specified\" && exit 0",
     "dev": "./node_modules/.bin/quasar dev",
-    "compose": "npm install && npm run dev",
+    "compose": "yarn install && yarn run dev",
     "build": "quasar build"
   },
   "dependencies": {

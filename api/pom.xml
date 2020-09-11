@@ -40,6 +40,10 @@
             <artifactId>vertx-infinispan</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-config-kubernetes-configmap</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.30</version>
@@ -70,7 +74,7 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <jvmArgs>-Djava.net.preferIPv4Stack=true -Djgroups.tcp.address=NON_LOOPBACK</jvmArgs>
+                            <jvmArgs>-Djava.net.preferIPv4Stack=true -Djgroups.tcp.address=NON_LOOPBACK -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory</jvmArgs>
                             <runArgs>--cluster</runArgs>
                             <config>${project.basedir}/config.json</config>
                         </configuration>

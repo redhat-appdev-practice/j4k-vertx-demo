@@ -7,12 +7,13 @@ export interface Payload {
 }
 
 const mutation: MutationTree<StateInterface> = {
-  UPDATE_OR_INSERT_POD_ID (state: StateInterface, payload: { id: string, requestCount: number }): void {
+  UPDATE_OR_INSERT_POD_ID (state: StateInterface, payload: Pod): void {
     const podIndex = state.pods.findIndex(p => p.id == payload.id);
     if (podIndex >= 0) {
       state.pods[podIndex].id = payload.id;
       state.pods[podIndex].requestCount = payload.requestCount;
       state.pods[podIndex].lastUpdate = new Date();
+      state.pods[podIndex].appname = payload.appname;
     } else {
       console.log(`Adding new pod: ${payload.id}`);
       state.pods.push({id: payload.id, lastUpdate: new Date(), requestCount: payload.requestCount});

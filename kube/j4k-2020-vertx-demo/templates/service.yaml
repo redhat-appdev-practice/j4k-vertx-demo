@@ -17,6 +17,5 @@ spec:
       targetPort: 8080
   selector:
     deployment: j4kdemo
-  clusterIP: ''
   type: ClusterIP
   sessionAffinity: None
