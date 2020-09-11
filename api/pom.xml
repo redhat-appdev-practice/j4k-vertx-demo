@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.redhat.runtimes</groupId>
     <artifactId>j4k-demo</artifactId>
-    <version>1.0.12-SNAPSHOT</version>
+    <version>1.0.17-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -164,7 +164,7 @@
                         <version>2.5.2</version>
                         <configuration>
                             <to>
-                                <image>docker.io/infosec812/j4k-2020-vertx-kubernetes12</image>
+                                <image>docker.io/infosec812/j4k-2020-vertx-kubernetes17</image>
                                 <auth>
                                     <username>${env.DOCKER_USER}</username>
                                     <password>${env.DOCKER_PASS}</password>
