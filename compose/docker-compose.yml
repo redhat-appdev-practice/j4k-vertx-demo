@@ -1,11 +1,47 @@
 ---
 version: '3.8'
 services:
+  ui:
+    image: node:lts
+    volumes:
+      - '${PWD}/../ui:/workspace'
+    working_dir: /workspace
+    command:
+      - yarn
+      - run
+      - dev
+    networks:
+      - primary
   api:
-    image: docker.io/infosec812/j4k-2020-vertx-docker:latest
+    image: maven:latest
+    volumes:
+      - '${PWD}/../api:/workspace'
+      - '/tmp/m2/repository:/root/.m2/repository'
+    working_dir: /workspace
+    command:
+      - mvn
+      - clean
+      - compile
+      - vertx:run@run
+      - '-Pcompose'
     restart: always
+    networks:
+      - primary
   haproxy:
-    image: myhaproxy
-    build: ./
+    image: dev-proxy:latest
+    build:
+      context: .
+      dockerfile: Dockerfile_dev
     ports:
       - '80:80'
+    networks:
+      - primary
+    links:
+      - ui
+      - api
+networks:
+  primary:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.24.12.0/24

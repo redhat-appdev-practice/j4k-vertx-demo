@@ -1,4 +1,5 @@
 {
     "port": 8080,
-    "origin": "http://localhost"
+    "origin": "http://localhost",
+    "appname": "Blah blah blah"
 }

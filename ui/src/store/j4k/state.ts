@@ -2,6 +2,7 @@ export interface Pod {
   id: string;
   lastUpdate?: Date;
   requestCount?: number;
+  appname?: string;
 }
 
 export interface StateInterface {

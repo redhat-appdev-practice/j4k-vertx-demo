@@ -5,6 +5,10 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.vertx.config.ConfigChange;
+import io.vertx.config.ConfigRetriever;
+import io.vertx.config.ConfigRetrieverOptions;
+import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -29,31 +33,44 @@ public class MainVerticle extends AbstractVerticle {
     private static final Logger LOG = LoggerFactory.getLogger(MainVerticle.class);
 
     Counter requestCounter;
+    private final JsonObject currentConfig = new JsonObject();
+    private ConfigRetrieverOptions addStore;
 
     @Override
     public void start(final Promise<Void> startPromise) {
+        currentConfig.put("appname", "J4K Vert.x Demo");
+        currentConfig.put("port", 8080);
+        currentConfig.mergeIn(config());
+
+        // Check to see if this application is running inside of a Kubernetes
+        // cluster by looking to see if there is a service account token.
+        vertx.fileSystem().exists("/run/secrets/kubernetes.io/serviceaccount/token")
+            .onSuccess(this::initConfigWatcher);
 
         LOG.info("Creating Router");
         final Router router = Router.router(vertx);
+
+        router.route().handler(this::logAllRequests);
 
         // Use the clustered session implementation
         router.route().handler(clusteredSession());
 
         // Create a GET endpoint
-        router.get("/podinfo").handler(this::podInfoHandler);
+        router.get("/api/healthz").handler(this::healthCheck);
+        router.get("/api/podinfo").handler(this::podInfoHandler);
 
         // Enable all other endpoints to serve static content from src/main/resources/webroot
         router.route().handler(configStaticHandler());
 
         LOG.info("Create EventBus Bridge");
-        router.mountSubRouter("/eventbus", sockJsBridge());
+        router.mountSubRouter("/api/eventbus", sockJsBridge());
 
         LOG.info("Creating HTTP Server");
         HttpServer server = vertx.createHttpServer()
             .requestHandler(router);
 
         // Start the HTTP Server
-        server.listen(config().getInteger("port", 8080))
+        server.listen(currentConfig.getInteger("port", 80))
             .compose(this::initSharedData)                  // Initialize a shared data structure in the cluster
             .onSuccess(counter -> {
                 requestCounter = counter;
@@ -62,6 +79,22 @@ public class MainVerticle extends AbstractVerticle {
             })
             .onComplete(res -> startPromise.complete())     // Let Vert.x know our Verticle is running
             .onFailure(startPromise::fail);                 // OR let Vert.x know our Verticle failed
+    }
+
+    private void logAllRequests(RoutingContext ctx) {
+        LOG.info("Request: {}", ctx.request().path());
+        ctx.next();
+    }
+
+    /**
+     * Simple health check endpoint
+     * @param ctx
+     */
+    private void healthCheck(RoutingContext ctx) {
+        ctx.response().setStatusCode(200)
+                    .setStatusMessage("OK")
+                    .putHeader("Content-Type", "text/plain")
+                    .end("OK");
     }
 
     /**
@@ -132,11 +165,56 @@ public class MainVerticle extends AbstractVerticle {
      * @param t The timestampe of the periodic scheduler
      */
     private void sendPeriodic(Long t) {
-        requestCounter.get()
-            .onComplete(res -> {
-                JsonObject periodicMessage = new JsonObject().put("id", INSTANCE_ID);
-                periodicMessage.put(REQUEST_COUNTER, res.result());
+        requestCounter
+            .get()
+            .onSuccess(this::sendStatusWithRequestCount);
+    }
+
+    /**
+     * Given the result of an Async request for the shared counter value,
+     * send a status message on the event bus.
+     * @param res A {@link Long} value which is the current count of REST requests to /api/podinfo
+     */
+    private void sendStatusWithRequestCount(Long requestCount) {
+        JsonObject periodicMessage = new JsonObject().put("id", INSTANCE_ID);
+                periodicMessage.put(REQUEST_COUNTER, requestCount);
+                periodicMessage.put("appname", currentConfig.getString("appname"));
                 vertx.eventBus().publish("status", periodicMessage);
-            });
+    }
+
+    /**
+     * Listen for ConfigMap changes via the Kubernetes API and when the configuration
+     * changes, load those configuration changes into the current configuration object.
+     */
+    private void initConfigWatcher(Boolean isRunningInKubernetes) {
+        LOG.info("Detected Service Account Token: Attempting to load configuration from Kubernetes API.");
+
+        ConfigStoreOptions configFile = new ConfigStoreOptions()
+                                                .setType("file")
+                                                .setFormat("json")
+                                                .setConfig(new JsonObject().put("path", "./config.json"));
+        ConfigStoreOptions kubeConfig = new ConfigStoreOptions()
+                                                .setType("configmap")
+                                                .setConfig(
+                                                    new JsonObject()
+                                                            .put("namespace", System.getenv().getOrDefault("KUBERNETES_NAMESPACE", "default"))
+                                                            .put("name", "j4kdemo")
+                                                );
+        ConfigRetrieverOptions retrOpts = new ConfigRetrieverOptions()
+                                                .addStore(configFile)
+                                                .addStore(kubeConfig);
+
+
+        ConfigRetriever retriever = ConfigRetriever.create(vertx, retrOpts);
+        retriever.listen(this::loadNewConfig);
+    }
+
+    /**
+     * Given a configuration change, load that into the current configuration
+     * @param change An instance of {@link ConfigChange} with the latest configuration from the Kubernetes API.
+     */
+    private void loadNewConfig(ConfigChange change) {
+        LOG.info("Loading new configuration: {}\n", change.getNewConfiguration().encodePrettily());
+        this.currentConfig.mergeIn(change.getNewConfiguration());
     }
 }

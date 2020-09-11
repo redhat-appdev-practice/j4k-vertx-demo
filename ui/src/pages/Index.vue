@@ -4,12 +4,13 @@
       v-for="pod in pods"
       :key="pod.id"
       class="col-2"
-      style="width: 24rem; height: 12rem; margin: 0.3rem 0.3rem 0.3rem 0.3rem;"
+      style="width: 24rem; height: 16rem; margin: 0.3rem 0.3rem 0.3rem 0.3rem;"
       :class="cardClass(pod.id)">
       <q-card-section>
         <q-toolbar-title style="width: 100%; text-align: center;">Pod ({{ pod.requestCount }})</q-toolbar-title>
       </q-card-section>
       <q-card-section style="text-align: center;">{{ pod.id }}</q-card-section>
+      <q-card-section style="text-align: center;">{{ pod.appname }}</q-card-section>
       <q-card-section style="text-align: center; font-size: 1.7rem;">{{ pod.lastUpdate | formatDateTime }}</q-card-section>
     </q-card>
   </q-page>
@@ -65,7 +66,7 @@ export default class PageIndex extends Vue {
   startListening(): void {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion,@typescript-eslint/unbound-method
     this.eb!.onclose = this.connectToNewPod;
-    this.eb?.registerHandler('status', (err: never, msg: { body: { id: string; }; }) => {
+    this.eb?.registerHandler('status', (err: never, msg: { body: Pod }) => {
       if (err) {
         this.$q.loading.hide();
         console.log(`Error: ${JSON.stringify(err)}`);
@@ -78,7 +79,7 @@ export default class PageIndex extends Vue {
 
   connectEventBus(): void {
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    this.eb = new EventBus(`${window.location.origin}/eventbus`, this.options);
+    this.eb = new EventBus(`${window.location.origin}/api/eventbus`, this.options);
     // eslint-disable-next-line @typescript-eslint/unbound-method
     this.eb.onopen = this.startListening;
   }
@@ -90,7 +91,7 @@ export default class PageIndex extends Vue {
       this.eb?.close();
       this.connectEventBus();
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      Axios.get(`${window.location.origin}/podinfo`)
+      Axios.get(`${window.location.origin}/api/podinfo`)
         .then(value => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
           this.$store.commit('j4k/UPDATE_CURRENT_POD', {id: value.data.id, count: value.data.requestCount});
