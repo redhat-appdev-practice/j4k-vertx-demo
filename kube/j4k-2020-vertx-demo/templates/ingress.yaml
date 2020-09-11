@@ -1,0 +1,10 @@
+{{- if ne $.Values.useRoute true}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: j4kdemo
+spec:
+  backend:
+    serviceName: j4kdemo
+    servicePort: 8080
+{{- end }}
