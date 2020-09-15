@@ -111,7 +111,7 @@
                 <version>2.5.2</version>
                 <configuration>
                     <to>
-                        <image>docker.io/infosec812/j4k-2020-vertx-docker</image>
+                        <image>docker.io/${env.DOCKER_USER}/j4k-2020-vertx-docker</image>
                         <auth>
                             <username>${env.DOCKER_USER}</username>
                             <password>${env.DOCKER_PASS}</password>

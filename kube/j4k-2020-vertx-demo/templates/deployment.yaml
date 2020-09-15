@@ -52,7 +52,7 @@ spec:
               protocol: TCP
           imagePullPolicy: Always
           terminationMessagePolicy: File
-          image: docker.io/infosec812/j4k-2020-vertx-kubernetes17:v1.0.17-SNAPSHOT
+          image: docker.io/{{ $.Values.dockerUser | default 'infosec812' | quote }}/j4k-2020-vertx-kubernetes:v1.0.0-SNAPSHOT
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
