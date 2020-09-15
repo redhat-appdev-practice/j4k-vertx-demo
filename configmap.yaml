@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: j4kdemo
 data:
-  appname: 'Java-4-Kubernetes'
+  appname: 'Vert.x Rocks!'

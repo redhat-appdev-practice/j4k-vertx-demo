@@ -42,13 +42,9 @@ public class MainVerticle extends AbstractVerticle {
         currentConfig.put("port", 8080);
         currentConfig.mergeIn(config());
 
-        // Check to see if this application is running inside of a Kubernetes
-        // cluster by looking to see if there is a service account token.
-        initKubernetesWatcher();
-
         // Watch for configuration file changes
         vertx.fileSystem().exists("./config.json")
-            .onSuccess(this::initConfigWatcher);
+            .onSuccess(this::initConfig);
 
         LOG.info("Creating Router");
         final Router router = Router.router(vertx);
@@ -141,6 +137,9 @@ public class MainVerticle extends AbstractVerticle {
         Session session = ctx.session();
         JsonObject podInfo = new JsonObject();
         podInfo.put("id", INSTANCE_ID);
+
+        // Since this is specific to each user session, we do not need to be concerned about
+        // race conditions where multiple users would access the application at the same time.
         Integer reqCount = (Integer)session.data().getOrDefault(REQUEST_COUNTER, 0);
         session.data().put(REQUEST_COUNTER, reqCount+1);
         podInfo.put(REQUEST_COUNTER, reqCount+1);
@@ -182,49 +181,44 @@ public class MainVerticle extends AbstractVerticle {
         JsonObject periodicMessage = new JsonObject().put("id", INSTANCE_ID);
                 periodicMessage.put(REQUEST_COUNTER, requestCount);
                 periodicMessage.put(APP_NAME, currentConfig.getString(APP_NAME));
-                vertx.eventBus().publish("status", periodicMessage);
+            vertx.eventBus().publish("status", periodicMessage);
     }
 
-    /**
-     * Listen for ConfigMap changes via the Kubernetes API and when the configuration
-     * changes, load those configuration changes into the current configuration object.
-     */
-    private void initKubernetesWatcher() {
+    private Future<Void> initConfig(boolean hasConfigJsonFile) {
+        ConfigRetrieverOptions configOpts = new ConfigRetrieverOptions();
         if (System.getenv().containsKey("KUBERNETES_NAMESPACE")) {
-            LOG.info("Attempting to load configuration from Kubernetes API.");
-            ConfigRetrieverOptions configOpts = new ConfigRetrieverOptions();
-            ConfigStoreOptions kubeConfig = new ConfigStoreOptions()
-                                                    .setType("configmap")
-                                                    .setConfig(
-                                                        new JsonObject()
-                                                                .put("namespace", System.getenv().getOrDefault("KUBERNETES_NAMESPACE", "default"))
-                                                                .put("name", "j4kdemo")
-                                                    );
-            configOpts.addStore(kubeConfig);
-
-            ConfigRetriever retriever = ConfigRetriever.create(vertx, configOpts);
-            retriever.listen(this::loadNewConfig);
+            configOpts.addStore(initKubernetesWatcher());
         }
+        if (hasConfigJsonFile) {
+            configOpts.addStore(initConfigWatcher());
+        }
+        ConfigRetriever.create(vertx, configOpts).listen(this::loadNewConfig);
+        return Future.succeededFuture();
     }
 
     /**
      * Listen for ConfigMap changes via the Kubernetes API and when the configuration
      * changes, load those configuration changes into the current configuration object.
      */
-    private void initConfigWatcher(boolean configJsonExists) {
-        LOG.info("Config JSON Existence: {}", configJsonExists);
-        if (configJsonExists) {
-            LOG.info("Detected Service Account Token: Attempting to load configuration from Kubernetes API.");
-            ConfigRetrieverOptions configOpts = new ConfigRetrieverOptions();
+    private ConfigStoreOptions initKubernetesWatcher() {
+        return new ConfigStoreOptions()
+                    .setType("configmap")
+                    .setConfig(
+                        new JsonObject()
+                            .put("namespace", System.getenv().getOrDefault("KUBERNETES_NAMESPACE", "default"))
+                            .put("name", "j4kdemo")
+                    );
+    }
 
-            ConfigStoreOptions configFile = new ConfigStoreOptions()
-                                                    .setType("file")
-                                                    .setFormat("json")
-                                                    .setConfig(new JsonObject().put("path", "./config.json"));
-            configOpts.addStore(configFile);
-            ConfigRetriever retriever = ConfigRetriever.create(vertx, configOpts);
-            retriever.listen(this::loadNewConfig);
-        }
+    /**
+     * Listen for ConfigMap changes via the Kubernetes API and when the configuration
+     * changes, load those configuration changes into the current configuration object.
+     */
+    private ConfigStoreOptions initConfigWatcher() {
+        return new ConfigStoreOptions()
+                    .setType("file")
+                    .setFormat("json")
+                    .setConfig(new JsonObject().put("path", "./config.json"));
     }
 
     /**
