@@ -11,12 +11,18 @@ various stages, you will see how you can leverage:
 * Use a clustered HTTP Session Store to allow for session management across load-balanced instances
 * Use the Vert.x Event Bus to distribute workloads across scalable instances in the cloud
 
-## Pre-requisites
+## Pre-requisites For Vert.x
 * A Java Development Kit (JDK) >= 1.8 (Java 11/GraalVM is preferred)
 * Apache Maven >= 3.6
 * The IDE of your choice, though you will have the best experience with IntelliJ, NetBeans, or Eclipse (VSCode works, but is not as intuitive)
 * Access to a Kubernetes installation via [Minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/), [KIND](https://kubernetes.io/docs/setup/learning-environment/kind/), [CodeReady Containers](https://developers.redhat.com/products/codeready-containers/overview), or any other Kubernetes >= 1.14
+  * If you are using Minikube, ensure that you enable the ingress addon `minikube addons enable ingress`
 * [Helm 3](https://helm.sh/docs/intro/install/)
+
+## For Building The UI
+* NodeJS >= 12
+* NPM >= 6
+* Yarn ~= 1.22.x
 
 ## Stage 1 - Getting Started
 
@@ -374,7 +380,7 @@ various stages, you will see how you can leverage:
                 <args>
                     <arg>run</arg>
                     <arg>--cluster</arg>
-                    <arg>com.redhat.runtimes.MainVerticle</arg>
+                    <arg>${vertx.verticle}</arg>
                 </args>
             </container>
         </configuration>
@@ -388,7 +394,6 @@ various stages, you will see how you can leverage:
         </executions>
     </plugin>
    ```
-   * **NOTE:** Notice the args for the container in the `Jib` plugin use a `MainVerticle` class inside of a package named `com.redhat.runtimes`. IF you named your package something else, **please make sure to adjust your configuration!!!**
 1. Build the entire application using the provided script in the root of this repository
    * `./buildAll.sh`
 1. Change directories to the `<root>/kube/j4k-2020-vertx-demo` subdirectory

@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.redhat.runtimes</groupId>
     <artifactId>j4k-demo</artifactId>
-    <version>1.0.17-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -120,7 +120,7 @@
                     <container>
                         <jvmFlags>
                             <jvmFlag>-Djava.net.preferIPv4Stack=true</jvmFlag>
-                            <jvmFlag>-Djgroups.tcp.address=NON_LOOPBACK</jvmFlag>
+                            <jvmFlag>-Dvertx.jgroups.config=default-configs/default-jgroups-kubernetes.xml</jvmFlag>
                             <jvmFlag>-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory</jvmFlag>
                         </jvmFlags>
                         <mainClass>io.vertx.core.Launcher</mainClass>
@@ -130,7 +130,7 @@
                         <args>
                             <arg>run</arg>
                             <arg>--cluster</arg>
-                            <arg>com.redhat.runtimes.MainVerticle</arg>
+                            <arg>${vertx.verticle}</arg>
                         </args>
                     </container>
                 </configuration>
@@ -145,62 +145,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>kubernetes</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.infinispan</groupId>
-                    <artifactId>infinispan-cloud</artifactId>
-                    <version>9.4.10.Final</version>
-                </dependency>
-            </dependencies>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.google.cloud.tools</groupId>
-                        <artifactId>jib-maven-plugin</artifactId>
-                        <version>2.5.2</version>
-                        <configuration>
-                            <to>
-                                <image>docker.io/infosec812/j4k-2020-vertx-kubernetes17</image>
-                                <auth>
-                                    <username>${env.DOCKER_USER}</username>
-                                    <password>${env.DOCKER_PASS}</password>
-                                </auth>
-                                <tags>
-                                    <tag>v${project.version}</tag>
-                                </tags>
-                            </to>
-                            <container>
-                                <jvmFlags>
-                                    <jvmFlag>-Djava.net.preferIPv4Stack=true</jvmFlag>
-                                    <jvmFlag>-Dvertx.jgroups.config=default-configs/default-jgroups-kubernetes.xml</jvmFlag>
-                                    <jvmFlag>-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory</jvmFlag>
-                                </jvmFlags>
-                                <mainClass>io.vertx.core.Launcher</mainClass>
-                                <ports>
-                                    <port>8080</port>
-                                </ports>
-                                <args>
-                                    <arg>run</arg>
-                                    <arg>--cluster</arg>
-                                    <arg>com.redhat.runtimes.MainVerticle</arg>
-                                </args>
-                            </container>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>build</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

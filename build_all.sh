@@ -7,5 +7,4 @@ cd ..
 
 cd api
 mvn clean package
-mvn clean compile package -Pkubernetes
 cd ..
