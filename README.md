@@ -284,7 +284,7 @@ various stages, you will see how you can leverage:
    ```
 
 
-## Stage 9 - Send PEriodic Messages Using The EventBus
+## Stage 9 - Send Periodic Messages Using The EventBus
 1. In the `start` method of `MainVerticle`, modify the HttpServer startup to be as follows:
    ```java
    vertx.createHttpServer()                             // Create the HTTP Server Instance
@@ -428,4 +428,4 @@ various stages, you will see how you can leverage:
      appname: 'Vert.x Rocks!'
    ```
    * Once the `ConfigMap` is created, you will see the app name in the UI update after a short delay
-     * This **DOES NOT** trigger an **RESTART** of the pods, the configuration change is noticed and loaded dynamically while the application remains running.
+     * This **DOES NOT** trigger a **RESTART** of the pods, the configuration change is noticed and loaded dynamically while the application remains running.
