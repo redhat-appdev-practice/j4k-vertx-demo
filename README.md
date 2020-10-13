@@ -1,6 +1,6 @@
 ## Vert.x Kubernetes Demo
 
-### Overview [[VIDEO](https://drive.google.com/file/d/1HwkCnJRIiyY8chF9m1x6bcW98rpXT43f/view?usp=sharing)]
+### Overview [[VIDEO](https://youtu.be/-3owVz0-F1o)]
 
 This project demonstrates some of the features of Vert.x which make it an ideal toolkit for the development of applications which will be deployed on Kubernetes (or other Cloud implementations). In this project and it’s various stages, you will see how you can leverage:
 
